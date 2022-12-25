@@ -1,22 +1,32 @@
-﻿using IdentityServer4.Models;
+﻿using Credentials.Identity.Models;
+using IdentityServer4.Models;
 using IdentityServer4.Stores;
 
 namespace Credentials.Identity.Services;
 
 internal sealed class CredentialsStore : IClientStore
 {
-    public Task<Client> FindClientByIdAsync(string clientId)
+    private readonly IUserRepository _userRepository;
+
+    public CredentialsStore(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
+    public async Task<Client> FindClientByIdAsync(string clientId)
     {
         //First Call.
-        Console.WriteLine($"CredentialsStore::FindClientByIdAsync - ClientId: {clientId}");
+        Console.WriteLine($"1 - CredentialsStore::FindClientByIdAsync - ClientId: {clientId}");
 
-        return Task.FromResult(
+        DbUser user = await _userRepository.GetUserByNameAsync(clientId);
+
+        return
             new Client
             {
-                ClientId = "123",
+                ClientId = user.Id,
                 ClientSecrets =
                 {
-                     new Secret { Value = "345" } // needed for token validation.
+                     new Secret { Value = user.PasswordHash } // needed for token validation.
                 },
                  
                 Claims =
@@ -26,7 +36,7 @@ internal sealed class CredentialsStore : IClientStore
                 },
                 ClientClaimsPrefix = string.Empty, // override default prefix.
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                AllowedScopes = { "test-1", "test-2", "test-3" } // add only scopes defined in the array in AppScope in the Program.cs -> GetApiScope
-            });
+                AllowedScopes = { Scopes.UpdateUser, Scopes.GetUser } // add only scopes defined in the array in AppScope in the Program.cs -> GetApiScope
+            };
     }
 }

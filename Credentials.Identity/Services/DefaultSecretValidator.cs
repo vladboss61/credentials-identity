@@ -7,7 +7,7 @@ internal sealed class DefaultSecretValidator : ISecretValidator
 {
     public Task<SecretValidationResult> ValidateAsync(IEnumerable<Secret> secrets, ParsedSecret parsedSecret)
     {
-        Console.WriteLine("DefaultSecretValidator::ValidateAsync");
+        Console.WriteLine("2 - DefaultSecretValidator::ValidateAsync");
         return Task.FromResult(new SecretValidationResult { Success = true });
     }
 }

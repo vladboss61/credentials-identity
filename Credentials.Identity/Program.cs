@@ -1,4 +1,5 @@
-﻿using Credentials.Identity.Services;
+﻿using Credentials.Identity.Models;
+using Credentials.Identity.Services;
 using IdentityServer4.Models;
 
 namespace Credentials.Identity
@@ -9,13 +10,13 @@ namespace Credentials.Identity
         {
             return new[]
             {
-                new ApiResource("test-1")
+                new ApiResource(Scopes.GetUser)
                 {
-                    Scopes = { "test-1" }
+                    Scopes = { Scopes.GetUser }
                 },
-                new ApiResource("test-2")
+                new ApiResource(Scopes.UpdateUser)
                 {
-                    Scopes = { "test-2" }
+                    Scopes = { Scopes.UpdateUser }
                 }
             };
         }
@@ -24,8 +25,8 @@ namespace Credentials.Identity
         {
             return new[]
             {
-                new ApiScope("test-1"),
-                new ApiScope("test-2")
+                new ApiScope(Scopes.GetUser),
+                new ApiScope(Scopes.UpdateUser)
             };
         }
 
@@ -38,7 +39,15 @@ namespace Credentials.Identity
                 .UseContentRoot(Directory.GetCurrentDirectory());
 
             var services = builder.Services;
+            
+            services.AddScoped<IUserRepository, MemoryUserRepository>();
+            services.AddScoped<IPasswordHasher, SimplePasswordHasher>();
+
+            services.AddMemoryCache();
+            services.AddDistributedMemoryCache();
+
             services.AddControllers();
+
             services
                 .AddIdentityServer(
                     options =>
@@ -61,12 +70,13 @@ namespace Credentials.Identity
             WebApplication app =  builder.Build();
 
             app.UseRouting();
+
+            app.UseIdentityServer();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
-
-            app.UseIdentityServer();
 
             app.Run();
         }
