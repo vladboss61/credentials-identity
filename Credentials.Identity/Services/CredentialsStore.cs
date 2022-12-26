@@ -26,17 +26,16 @@ internal sealed class CredentialsStore : IClientStore
                 ClientId = user.Id,
                 ClientSecrets =
                 {
-                     new Secret { Value = user.PasswordHash } // needed for token validation.
+                     new Secret { Value = user.PasswordHash } // needed for token validation in DefaultSecretValidator.
                 },
-                 
                 Claims =
                 {
                     new ClientClaim("Role", "Admin"),
                     new ClientClaim("Role", "DefaultUser")
                 },
-                ClientClaimsPrefix = string.Empty, // override default prefix.
+                ClientClaimsPrefix = string.Empty, // override default prefix _client.
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
-                AllowedScopes = { Scopes.UpdateUser, Scopes.GetUser } // add only scopes defined in the array in AppScope in the Program.cs -> GetApiScope
+                AllowedScopes = { Scopes.UpdateUser, Scopes.GetUser, "test-no-added" } // Add only scopes defined in the array in AppScope in the Program.cs -> GetApiScope.
             };
     }
 }
